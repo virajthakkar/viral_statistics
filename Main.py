@@ -15,3 +15,6 @@ for task in tasks:
     data[task.name]=[]
     for source in sources:
         data[task.name].append(source.search(disease,task))
+
+
+print("Hello")
