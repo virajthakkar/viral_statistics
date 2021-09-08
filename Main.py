@@ -24,16 +24,18 @@ import glob
 disease_name="covid"
 synonyms=['incubation','incubate']
 addons=[' days', ' time',' period',' time period ']
-
-incubation=task.Task(synonyms,addons)
-recovery=task.Task(['recovery','recovered','cured'],addons)
-survival=task.Task(['survival','survive','survives'],addons)
+ner_list=['DATE','TIME']
+incubation=task.Task(synonyms,addons,ner_list)
+recovery=task.Task(['recovery','recovered','cured'],addons,ner_list)
+survival=task.Task(['survival','survive','survives'],addons,ner_list)
+death=task.Task(['death','case fatality','mortality'],['rate','percent','risk','ratio'],['PERCENT'])
 #carrier_period=Task('carrier',['recovered','cured'],['days','time','period','hours'])
 
 
 pb=data_sourcing.PubMed() 
 
-tasks=[incubation,recovery,survival]
+tasks=[incubation,recovery,survival,death]
+#tasks=[death]
 sources=[pb]
 # disease=input()
 
