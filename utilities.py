@@ -20,6 +20,8 @@ def sentences(text):  #text to sentence list
 
 def filter_sentence_from_list(sents, filter_words,ner_list,nlp = spacy.load("en_core_web_sm")):  # input: List of sentences, output: list of filtered sentences
     filter_words=[s.lower().strip() for s in filter_words]
+    sents=lemmatize_list_of_sentences(sents,nlp)
+    filter_words=lemmatize_list_of_sentences(filter_words,nlp)
     sent_list=[]
     for s in sents:
         set_s=set(s.lower().split())
@@ -56,3 +58,12 @@ def give_str(disease_name,s_list,a_list):   #gives string as word1+word2+word3
         for a in a_list:
             this_str_list.append(disease_name + "+"+ s+"+"+a)
     return this_str_list
+
+
+
+def lemmatize_list_of_sentences(list_of_sentences,nlp=spacy.load("en_core_web_sm")): 
+    list_of_sentence_lemmatized=[]
+    for sentence in list_of_sentences:
+        doc=nlp(sentence)
+        list_of_sentence_lemmatized.append(" ".join([token.lemma_ for token in doc]))
+    return list_of_sentence_lemmatized

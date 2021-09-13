@@ -29,7 +29,6 @@ incubation=task.Task(synonyms,addons,ner_list)
 recovery=task.Task(['recovery','recovered','cured'],addons,ner_list)
 survival=task.Task(['survival','survive','survives'],addons,ner_list)
 death=task.Task(['death','case fatality','mortality'],['rate','percent','risk','ratio'],['PERCENT'])
-#carrier_period=Task('carrier',['recovered','cured'],['days','time','period','hours'])
 
 
 pb=data_sourcing.PubMed() 

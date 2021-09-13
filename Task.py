@@ -4,7 +4,7 @@
 #Case Fatality Rate
 
 class Task():
-    def __init__(self,synonyms=[],addons=[],ner=[]):
+    def __init__(self,synonyms=[],addons=[],ner=[]):  #additional filter e.g. Country search in abstract
         #self.__name=name
         self.__synonyms=synonyms #list of names of task e.g ['Incubation','Incubate'] e.g ['recovery','recovered']
         self.__addons=addons  # list of search words e.g. ['days','time','period','time period']
