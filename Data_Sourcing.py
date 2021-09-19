@@ -44,9 +44,10 @@ class PubMed(Source):
         super().__init__(source_name,base_url)
 
 
-    def search_given_str(self,this_str,filter_words,ner_list,dic={},no_articles=20,base_url="https://pubmed.ncbi.nlm.nih.gov/",nlp = spacy.load("en_core_web_sm")): #reduce ident
+    def search_given_str(self,this_str,filter_words,ner_list,dic={},no_articles=20,base_url="https://pubmed.ncbi.nlm.nih.gov/",nlp = spacy.load("en_core_web_sm")):
         #"https://pubmed.ncbi.nlm.nih.gov/?term=influenza+incubation+days&filter=simsearch1.fha&format=abstract&size=20"
         search_str=base_url+ "?term="+this_str+"&filter=simsearch1.fha&format=abstract&size={}".format(no_articles)
+        print(search_str)
         page = requests.get(search_str)
         soup = BeautifulSoup(page.content, 'html.parser')
 
@@ -119,6 +120,103 @@ class PubMed(Source):
             dic=self.search_given_str(l,filter_words,ner_list,dic)
 
         return dic
+
+
+class Cambridge(Source):
+    def __init__(self,source_name='Cambridge',base_url='https://www.cambridge.org/core'):
+        super().__init__(source_name,base_url)
+
+    def search_given_str(self,this_str,filter_words,ner_list,dic={},no_pages=2,base_url="https://www.cambridge.org/core",nlp = spacy.load("en_core_web_sm")): 
+        #https://www.cambridge.org/core/search?q=covid%20incubation%20days&pageNum=1
+        
+        title_list=[]
+        abs_list=[]
+        info_list=[]
+        sentences_list=[]
+        prod_id_list=[]
+
+        for i in range(no_pages):
+            search_str=base_url+"/search?q="+this_str+"&pageNum={}".format(i+1)
+            print(search_str)
+
+            html = requests.get(search_str)
+            soup = BeautifulSoup(html.content, 'html.parser')
+            #print(soup.prettify())
+            time.sleep(1)
+
+            search_results=soup.find_all("div",class_="representation overview search")
+            #print("Length of titles on Page", i+1, " is ", len(search_results))
+            c=0
+            for s in search_results:
+                c+=1
+                #print("------------------",c,"----------------------")
+                try:
+                    #print(s['data-prod-id'])
+                    prod_id_list.append(s['data-prod-id'])
+                except:
+                    #print("NoID")
+                    prod_id_list.append("NoID")
+
+                
+                s=s.find("div",class_="row")
+                
+                #print("Title: ")
+
+                try:
+                    #print(s['data-test-title'])
+                    title_list.append( s['data-test-title'])
+                except:
+                    #print("Could not find title.")
+                    title_list.append("Could not find title.")
+
+                #print("Abstract: ")
+                try:
+                    #print(s.find("div",class_="abstract").get_text().strip())
+                    abs_list.append(s.find("div",class_="abstract").get_text().strip() )
+                except:
+                    #print("Could not find abstract.")
+                    abs_list.append("Could not find abstract.")
+
+                try:
+                    #print(s.find("li",class_="source").get_text().strip())
+                    info_list.append(s.find("li",class_="source").get_text().strip() )
+                except:
+                    #print("Could not find more information.")
+                    info_list.append("Could not find more information.")
+
+
+        for i in range(len(abs_list)):
+            sentences_list.append(abstract_to_relevant_sentences(abs_list[i],filter_words,ner_list,nlp))
+
+        for i in range(len(prod_id_list)):
+            article_dic={}
+            article_dic['title']=title_list[i]
+            article_dic['abstract']=abs_list[i]
+            article_dic['sentences']=sentences_list[i]
+            article_dic['information']=info_list[i]
+            dic[prod_id_list[i]]=article_dic
+        return dic
+
+    def search(self,disease,task):
+        disease_name=disease
+        synonyms=task.get_synonyms()
+        addons=task.get_addons()
+        ner_list=task.get_ner()
+        nlp = spacy.load("en_core_web_sm")
+        filter_words=synonyms
+
+    
+        list_strings_to_search=give_str(disease_name,synonyms,addons,'%20')
+
+        dic={}
+        for l in tqdm(list_strings_to_search):
+            print(l)
+            dic=self.search_given_str(l,filter_words,ner_list,dic)
+
+        return dic
+
+
+
 
 
 

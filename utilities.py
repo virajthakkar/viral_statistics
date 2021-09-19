@@ -47,16 +47,16 @@ def abstract_to_relevant_sentences(abstract,filter_words,ner_list,nlp= spacy.loa
 
 
 
-def give_str(disease_name,s_list,a_list):   #gives string as word1+word2+word3
+def give_str(disease_name,s_list,a_list,sep='+'):   #gives string as word1+word2+word3 #default seperation = '+'
     this_str_list=[]
-    disease_name=re.sub(r"\s+", '+', disease_name.strip())
+    disease_name=re.sub(r"\s+", sep, disease_name.strip())
     s_list=[s.lower().strip() for s in s_list]
-    s_list=[re.sub(r"\s+", '+',s) for s in s_list ]
+    s_list=[re.sub(r"\s+", sep,s) for s in s_list ]
     a_list=[a.lower().strip() for a in a_list]
-    a_list=[re.sub(r"\s+", '+',a) for a in a_list ]
+    a_list=[re.sub(r"\s+", sep,a) for a in a_list ]
     for s in s_list:
         for a in a_list:
-            this_str_list.append(disease_name + "+"+ s+"+"+a)
+            this_str_list.append(disease_name + sep+ s+sep+a)
     return this_str_list
 
 

@@ -23,7 +23,7 @@ import glob
 
 disease_name="covid"
 synonyms=['incubation','incubate']
-addons=[' days', ' time',' period',' time period ']
+addons=['days', 'time','period','time period']
 ner_list=['DATE','TIME']
 incubation=task.Task(synonyms,addons,ner_list)
 recovery=task.Task(['recovery','recovered','cured'],addons,ner_list)
@@ -31,19 +31,21 @@ survival=task.Task(['survival','survive','survives'],addons,ner_list)
 death=task.Task(['death','case fatality','mortality'],['rate','percent','risk','ratio'],['PERCENT'])
 
 
-pb=data_sourcing.PubMed() 
+pubmed=data_sourcing.PubMed() 
+cambridge=data_sourcing.Cambridge()
 
-tasks=[incubation,recovery,survival,death]
+tasks=[incubation,recovery]#  ,survival,death]
 #tasks=[death]
-sources=[pb]
+sources=[pubmed,cambridge]
 # disease=input()
 
-data={}  #dictionary of data , key= task name, value= list from sources e.g. data['incubation']---> [ dic_from_pubmed, dic_from_google  ]
+data={}  #dictionary of data , key= task name, value= dic with keys as source names e.g. data['incubation']--->  {dic_from_pubmed, dic_from_google } 
 for task in tasks:
     task_name=task.get_synonyms()[0].strip()  #e.g. incubation, recovery etc
-    data[task_name]=[]  #add dic to this list from various sources
+    data[task_name]={}  #add dic to this list from various sources
     for source in sources:
-        data[task_name].append(source.search(disease_name,task))
+        data[task_name][source.get_source_name()]=source.search(disease_name,task)
+        #data[task_name].append(source.search(disease_name,task))
 
 
 # print(incubation.get_synonyms())
@@ -52,25 +54,31 @@ for task in tasks:
 task_list_names=list(data.keys())
 print(task_list_names)
 
+source_list_names=[s.get_source_name() for s in sources]
+
 for task_name in task_list_names:
-    dic=data[task_name][0]
     print("*************************************************** ",task_name,"  ***********************************************************************************************************************************")
+    for source_name in source_list_names:
+        print("----------------------------------------SOURCE: ",source_name,"--------------------------------------------------------------------------")
+
+        dic=data[task_name][source_name]
+        
 
 
-    ct=0
-    for k in list(dic.keys()):
-        if len(dic[k]['sentences'])>0:
-            ct+=1
-            print("------------------------------------------- ",ct," ----------------------------------------------------------")
-            print(k)
-            print("Title: ", dic[k]['title'])
-            print("-----------------------------------------------------------------------------------------------------")
-            print(dic[k]['sentences'], dic[k]['citations'])
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            print('\n')
+        ct=0
+        for k in list(dic.keys()):
+            if len(dic[k]['sentences'])>0:
+                ct+=1
+                print("------------------------------------------- ",ct," ----------------------------------------------------------")
+                print(k)
+                print("Title: ", dic[k]['title'])
+                print("-----------------------------------------------------------------------------------------------------")
+                print(dic[k]['sentences'])
+                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                print('\n')
 
 
-    print("Total articles for task {}: ".format(task_name), ct)
+        print("From {}, Total articles for task {}: ".format(source_name,task_name), ct)
 
 print("*******************************************************************END OF PROGRAM********************************************************************")
 
